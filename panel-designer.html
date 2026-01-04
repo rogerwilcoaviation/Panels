@@ -1,106 +1,1069 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Aircraft Panel Designer</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare. com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        body {
-            font-family: Arial, sans-serif;
+        : root {
+            --bg-dark: #0a0a0a;
+            --bg-panel: #1a1a1a;
+            --bg-light: #2a2a2a;
+            --border-color: #444;
+            --text-primary: #e0e0e0;
+            --text-secondary: #999;
+            --accent:  #00d4ff;
+            --success: #00ff88;
+            --warning: #ffaa00;
+            --danger: #ff3333;
+        }
+
+        * {
             margin: 0;
             padding: 0;
-            background-color: #f4f4f9;
+            box-sizing: border-box;
         }
 
-        header {
-            background: #333;
-            color: #fff;
-            padding: 10px;
-            text-align: center;
+        html, body {
+            width: 100%;
+            height:  100%;
+            font-family: 'Roboto', sans-serif;
+            background:  var(--bg-dark);
+            color: var(--text-primary);
+            overflow: hidden;
         }
 
-        .designer-container {
+        #workspace-container {
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+        }
+
+        /* SIDEBAR - LEFT */
+        #sidebar-left {
+            width: 280px;
+            background: var(--bg-panel);
+            border-right: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
-            justify-content: start;
+            overflow:  hidden;
+        }
+
+        . sidebar-header {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 700;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent);
+        }
+
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 8px;
+        }
+
+        .component-group {
+            margin-bottom: 12px;
+        }
+
+        . group-title {
+            font-size: 11px;
+            font-weight:  700;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            padding:  6px 8px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
             align-items: center;
-            padding: 20px;
-        }
-
-        #panel-preview {
-            width: 80%;
-            height: 500px;
-            border: 2px dashed #666;
-            margin: 10px;
-            background: #fff;
-            overflow: auto;
-        }
-
-        .component {
-            background: #222;
-            color: #fff;
-            margin: 5px;
-            border-radius: 3px;
-            padding: 3px 8px;
-            cursor: grab;
             user-select: none;
         }
 
-        .component.draggable {
-            cursor: grabbing;
+        .group-title:hover {
+            color: var(--accent);
         }
 
-        .btn {
-            margin: 5px;
-            padding: 10px;
+        .group-items {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .component-item {
+            padding: 8px;
+            background: var(--bg-light);
+            border: 1px solid var(--border-color);
+            border-radius:  2px;
+            font-size: 11px;
+            cursor: grab;
+            user-select: none;
+            transition: all 0.15s;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .component-item:hover {
+            background:  var(--bg-dark);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .component-item.dragging {
+            opacity: 0.5;
+        }
+
+        /* MAIN CANVAS */
+        #canvas-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-dark);
+        }
+
+        #top-toolbar {
+            height: 50px;
+            background: var(--bg-panel);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            gap: 12px;
+        }
+
+        . toolbar-btn {
+            padding:  6px 12px;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
             cursor: pointer;
-            background: #007bff;
-            color: #fff;
-            border-radius: 3px;
-            border: 0;
+            transition: all 0.15s;
+            border-radius: 2px;
         }
 
-        .btn.danger {
-            background: #dc3545;
+        .toolbar-btn:hover {
+            background: var(--bg-light);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .toolbar-btn.active {
+            background: var(--accent);
+            color: var(--bg-dark);
+            border-color: var(--accent);
+        }
+
+        .separator {
+            width: 1px;
+            height: 30px;
+            background: var(--border-color);
+        }
+
+        #canvas {
+            flex: 1;
+            background:  linear-gradient(45deg, #111 25%, transparent 25%, transparent 75%, #111 75%, #111),
+                        linear-gradient(45deg, #111 25%, transparent 25%, transparent 75%, #111 75%, #111);
+            background-size: 20px 20px;
+            background-position:  0 0, 10px 10px;
+            background-color: #0a0a0a;
+            position: relative;
+            overflow: hidden;
+            cursor: crosshair;
+        }
+
+        . panel-board {
+            position: absolute;
+            background: #000;
+            border: 2px solid #fff;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
+            cursor: move;
+        }
+
+        .instrument {
+            position: absolute;
+            background: #111;
+            border: 1px solid #666;
+            cursor: move;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #888;
+            text-align: center;
+            padding: 4px;
+            overflow: hidden;
+        }
+
+        .instrument img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            pointer-events: none;
+        }
+
+        .instrument. selected {
+            border:  2px dashed var(--accent);
+            box-shadow: 0 0 8px rgba(0, 212, 255, 0.3);
+            z-index: 1000;
+        }
+
+        .instrument.selected:: before {
+            content: '';
+            position: absolute;
+            top:  -4px;
+            left: -4px;
+            right: -4px;
+            bottom: -4px;
+            border: 1px dotted var(--accent);
+            pointer-events: none;
+        }
+
+        .resize-handle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
+            border:  1px solid var(--bg-dark);
+            display: none;
+            z-index: 1001;
+        }
+
+        .instrument. selected .resize-handle {
+            display: block;
+        }
+
+        .resize-handle. nw { top: -3px; left: -3px; cursor: nw-resize; }
+        .resize-handle.ne { top: -3px; right:  -3px; cursor: ne-resize; }
+        .resize-handle.sw { bottom: -3px; left: -3px; cursor: sw-resize; }
+        .resize-handle.se { bottom: -3px; right:  -3px; cursor: se-resize; }
+
+        .selection-box {
+            position: absolute;
+            border: 1px dashed var(--accent);
+            background: rgba(0, 212, 255, 0.05);
+            pointer-events: none;
+            display: none;
+        }
+
+        /* SIDEBAR - RIGHT */
+        #sidebar-right {
+            width:  280px;
+            background:  var(--bg-panel);
+            border-left: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .properties-form {
+            padding: 12px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .property-group {
+            margin-bottom: 16px;
+        }
+
+        . property-label {
+            font-size: 10px;
+            font-weight:  700;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .property-input, .property-select {
+            width: 100%;
+            padding:  6px;
+            background: var(--bg-light);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            font-size: 11px;
+            border-radius:  2px;
+            font-family: 'Courier Prime', monospace;
+        }
+
+        .property-input:focus, .property-select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 4px rgba(0, 212, 255, 0.2);
+        }
+
+        .prop-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        . prop-row-full {
+            grid-column: 1 / -1;
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+
+        . btn-small {
+            padding: 6px;
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            font-size: 10px;
+            cursor: pointer;
+            transition: all 0.15s;
+            border-radius: 2px;
+        }
+
+        . btn-small:hover {
+            background: var(--bg-light);
+            border-color: var(--accent);
+        }
+
+        .btn-small. danger {
+            color: var(--danger);
+            border-color: var(--danger);
+        }
+
+        .btn-small. danger:hover {
+            background: rgba(255, 51, 51, 0.1);
+        }
+
+        /* STATUS BAR */
+        #status-bar {
+            height: 24px;
+            background: var(--bg-panel);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            gap: 20px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            grid-column: 1 / -1;
+        }
+
+        . status-item {
+            display:  flex;
+            gap: 6px;
+        }
+
+        .status-value {
+            color: var(--accent);
+            font-weight: 700;
+            font-family: 'Courier Prime', monospace;
+        }
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-light);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background:  var(--border-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent);
+        }
+
+        /* CONTEXT MENU */
+        #context-menu {
+            display: none;
+            position: fixed;
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 2px;
+            min-width: 150px;
+            z-index: 9999;
+            box-shadow:  0 4px 12px rgba(0, 0, 0, 0.5);
+        }
+
+        .context-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            font-size: 11px;
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.1s;
+        }
+
+        . context-item:last-child {
+            border-bottom: none;
+        }
+
+        .context-item:hover {
+            background: var(--bg-light);
+            color: var(--accent);
+        }
+
+        .context-item.danger {
+            color: var(--danger);
+        }
+
+        /* HIDDEN INPUTS */
+        input[type="file"] {
+            display: none;
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>Aircraft Panel Designer</h1>
-    </header>
-    <div class="designer-container">
-        <h2>Panel Components</h2>
-        <div id="component-library">
-            <div class="component" draggable="true" data-type="altimeter">Altimeter</div>
-            <div class="component" draggable="true" data-type="airspeed">Airspeed Indicator</div>
-            <div class="component" draggable="true" data-type="horizon">Horizon Indicator</div>
-            <div class="component" draggable="true" data-type="compass">Compass</div>
+
+<div id="workspace-container">
+    <!-- LEFT SIDEBAR -->
+    <div id="sidebar-left">
+        <div class="sidebar-header">
+            <i class="fas fa-microchip" style="margin-right: 6px;"></i>Component Library
         </div>
-        <div id="panel-preview" ondrop="onDrop(event)" ondragover="onDragOver(event)"></div>
-        <button class="btn" onclick="savePanel()">Save Panel</button>
-        <button class="btn danger" onclick="clearPanel()">Clear</button>
+        <div style="padding: 8px; border-bottom: 1px solid var(--border-color);">
+            <input type="text" id="search-components" class="property-input" placeholder="Search... ">
+        </div>
+        <div class="sidebar-content" id="component-library">
+            <!-- Populated by JavaScript -->
+        </div>
     </div>
-    <script>
-        const panelPreview = document.getElementById('panel-preview');
-        const components = document.querySelectorAll('.component');
 
-        components.forEach(component => {
-            component.addEventListener('dragstart', () => {
-                component.classList.add('draggable');
-            });
-            component.addEventListener('dragend', () => {
-                component.classList.remove('draggable');
-            });
-        });
+    <!-- MAIN AREA -->
+    <div id="canvas-container">
+        <div id="top-toolbar">
+            <button class="toolbar-btn" id="btn-new" title="New Project">
+                <i class="fas fa-file"></i> New
+            </button>
+            <button class="toolbar-btn" id="btn-open" title="Open Project">
+                <i class="fas fa-folder-open"></i> Open
+            </button>
+            <button class="toolbar-btn" id="btn-save" title="Save Project">
+                <i class="fas fa-save"></i> Save
+            </button>
+            <div class="separator"></div>
+            <button class="toolbar-btn" id="btn-undo" title="Undo (Ctrl+Z)">
+                <i class="fas fa-undo"></i> Undo
+            </button>
+            <button class="toolbar-btn" id="btn-redo" title="Redo (Ctrl+Y)">
+                <i class="fas fa-redo"></i> Redo
+            </button>
+            <div class="separator"></div>
+            <button class="toolbar-btn" id="btn-delete" title="Delete Selected (Delete)">
+                <i class="fas fa-trash"></i> Delete
+            </button>
+            <div style="flex: 1;"></div>
+            <div class="status-item" style="margin-right: auto;">
+                <span>ZOOM: </span>
+                <span class="status-value" id="zoom-display">100%</span>
+            </div>
+            <input type="range" id="zoom-slider" min="10" max="200" value="100" style="width: 100px;">
+        </div>
 
-        function onDragOver(ev) {
-            ev.preventDefault(); // Enable drag over target
+        <div id="canvas">
+            <div class="selection-box" id="selection-box"></div>
+        </div>
+
+        <div id="status-bar">
+            <div class="status-item">
+                <span>CURSOR:</span>
+                <span class="status-value" id="cursor-pos">0, 0</span>
+            </div>
+            <div class="status-item">
+                <span>SELECTED:</span>
+                <span class="status-value" id="selected-count">0</span>
+            </div>
+            <div class="status-item">
+                <span>MODE:</span>
+                <span class="status-value" id="current-mode">Select</span>
+            </div>
+            <div style="flex: 1;"></div>
+            <span style="color: var(--text-secondary);">GitHub Pages Compatible • No Backend Required</span>
+        </div>
+    </div>
+
+    <!-- RIGHT SIDEBAR -->
+    <div id="sidebar-right">
+        <div class="sidebar-header">
+            <i class="fas fa-sliders-h" style="margin-right: 6px;"></i>Inspector
+        </div>
+        <div class="properties-form" id="properties-panel">
+            <div style="text-align: center; color: var(--text-secondary); padding: 20px;">
+                <i class="fas fa-square" style="font-size: 32px; opacity: 0.3; margin-bottom: 12px; display: block;"></i>
+                No selection
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CONTEXT MENU -->
+<div id="context-menu"></div>
+
+<!-- FILE INPUT -->
+<input type="file" id="file-input" accept=". json">
+
+<script>
+    // ============================================
+    // AIRCRAFT PANEL DESIGNER
+    // GitHub-Pages Friendly
+    // ============================================
+
+    class PanelDesigner {
+        constructor() {
+            this.canvas = document.getElementById('canvas');
+            this.panelBoard = null;
+            this.instruments = [];
+            this.selected = [];
+            this.zoom = 1;
+            this. panOffset = { x: 0, y: 0 };
+            this.isDragging = false;
+            this.isResizing = false;
+            this.dragStart = { x: 0, y: 0 };
+            this.resizeHandle = null;
+            this.history = [];
+            this.historyIndex = -1;
+            this.avionicsLibrary = [];
+            this.mode = 'select';
+
+            this.init();
         }
 
-        function onDrop(ev) {
-            ev.preventDefault(); // Allow dropping
-            const type = ev.target.dataset.type || ev.target.innerText;
-            const { offsetX, offsetY } = ev;
-            const newComp = document.createElement('child' || '"Panel"${top')!
-```  The initial implementation of the Aircraft Panel Designer application has been pushed to the `panel-designer` branch. You can now review and test the design.
+        init() {
+            this.setupCanvas();
+            this.loadAvionicsLibrary();
+            this.setupEventListeners();
+            this.createPanelBoard();
+            this.render();
+        }
+
+        setupCanvas() {
+            const canvasRect = this.canvas.getBoundingClientRect();
+            this.canvas.style.position = 'relative';
+        }
+
+        loadAvionicsLibrary() {
+            // Comprehensive avionics library from your repo
+            const library = {
+                'Instruments': [
+                    { name: 'Airspeed Indicator', w: 80, h: 80, category: 'Standard Six' },
+                    { name: 'Altimeter', w: 80, h: 80, category: 'Standard Six' },
+                    { name: 'Attitude Indicator', w: 80, h: 80, category: 'Standard Six' },
+                    { name: 'Directional Gyro', w: 80, h: 80, category: 'Standard Six' },
+                    { name: 'Vertical Speed', w: 80, h: 80, category: 'Standard Six' },
+                    { name:  'Turn Coordinator', w: 80, h: 80, category: 'Standard Six' },
+                ],
+                'Glass Cockpit': [
+                    { name: 'Garmin G1000 PFD', w: 260, h: 190, category: 'Glass Cockpit' },
+                    { name: 'Garmin G3X Touch', w: 280, h: 200, category:  'Glass Cockpit' },
+                    { name: 'Dynon SkyView HDX 12', w: 280, h: 200, category:  'Glass Cockpit' },
+                ],
+                'Radio Stack': [
+                    { name:  'Garmin GNS 530', w: 160, h: 115, category: 'Radio Stack' },
+                    { name: 'Garmin GNS 430', w: 160, h:  70, category: 'Radio Stack' },
+                    { name: 'Audio Panel', w: 160, h:  40, category: 'Radio Stack' },
+                    { name: 'Transponder', w: 160, h: 45, category: 'Radio Stack' },
+                ],
+                'Engine Monitors': [
+                    { name:  'JPI EDM 930', w: 160, h: 100, category: 'Engine Monitor' },
+                    { name: 'GRT EIS', w: 160, h: 120, category: 'Engine Monitor' },
+                    { name: 'Advanced Flight Systems ACS', w: 160, h:  120, category: 'Engine Monitor' },
+                ],
+                'Switches & Controls': [
+                    { name:  'Master Switch', w: 40, h: 50, category: 'Switch' },
+                    { name:  'Magneto Switch', w: 40, h:  50, category: 'Switch' },
+                    { name:  'Landing Gear', w: 40, h: 50, category: 'Switch' },
+                    { name: 'Fuel Selector', w: 40, h: 50, category: 'Switch' },
+                    { name: 'Start Button', w: 30, h: 30, category: 'Button' },
+                    { name:  'Circuit Breaker', w: 15, h: 15, category: 'Breaker' },
+                ],
+            };
+
+            this.avionicsLibrary = library;
+            this.populateLibrary();
+        }
+
+        populateLibrary() {
+            const libContainer = document.getElementById('component-library');
+            libContainer. innerHTML = '';
+
+            for (const [category, items] of Object.entries(this.avionicsLibrary)) {
+                const group = document.createElement('div');
+                group.className = 'component-group';
+                group.innerHTML = `
+                    <div class="group-title" data-category="${category}">
+                        <span>${category}</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="group-items" data-category="${category}"></div>
+                `;
+
+                const itemsContainer = group.querySelector(`[data-category="${category}"]`);
+                items.forEach(item => {
+                    const itemEl = document.createElement('div');
+                    itemEl.className = 'component-item';
+                    itemEl.draggable = true;
+                    itemEl.textContent = item.name;
+                    itemEl.dataset.itemData = JSON.stringify(item);
+
+                    itemEl.addEventListener('dragstart', (e) => this.onComponentDragStart(e, item));
+                    itemsContainer.appendChild(itemEl);
+                });
+
+                libContainer.appendChild(group);
+            }
+        }
+
+        createPanelBoard() {
+            const board = document.createElement('div');
+            board.className = 'panel-board';
+            board.style.width = '800px';
+            board.style. height = '500px';
+            board.style. left = '100px';
+            board.style. top = '100px';
+
+            const label = document.createElement('div');
+            label.style.position = 'absolute';
+            label.style.top = '-20px';
+            label.style. left = '0';
+            label.style.fontSize = '11px';
+            label.style. color = '#999';
+            label.textContent = 'BOARD_MAIN_01 [800x500mm]';
+            board.appendChild(label);
+
+            this.panelBoard = board;
+            this.canvas.appendChild(board);
+        }
+
+        onComponentDragStart(e, item) {
+            e.dataTransfer.effectAllowed = 'copy';
+            e.dataTransfer.setData('component', JSON.stringify(item));
+            e.target.classList.add('dragging');
+        }
+
+        setupEventListeners() {
+            // Canvas events
+            this.canvas. addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'copy';
+            });
+
+            this.canvas.addEventListener('drop', (e) => {
+                e.preventDefault();
+                const componentData = e.dataTransfer.getData('component');
+                if (componentData) {
+                    const item = JSON.parse(componentData);
+                    const rect = this.canvas.getBoundingClientRect();
+                    const x = (e.clientX - rect.left - this.panOffset.x) / this.zoom;
+                    const y = (e.clientY - rect.top - this.panOffset.y) / this.zoom;
+                    this.addInstrument(item, x, y);
+                }
+            });
+
+            this.canvas.addEventListener('mousedown', (e) => this.onCanvasMouseDown(e));
+            this.canvas.addEventListener('mousemove', (e) => this.onCanvasMouseMove(e));
+            this.canvas.addEventListener('mouseup', (e) => this.onCanvasMouseUp(e));
+            this.canvas.addEventListener('contextmenu', (e) => this.onCanvasContextMenu(e));
+            this.canvas.addEventListener('wheel', (e) => this.onCanvasWheel(e));
+
+            // Toolbar buttons
+            document.getElementById('btn-new').addEventListener('click', () => this.newProject());
+            document.getElementById('btn-open').addEventListener('click', () => this.openProject());
+            document.getElementById('btn-save').addEventListener('click', () => this.saveProject());
+            document.getElementById('btn-undo').addEventListener('click', () => this.undo());
+            document.getElementById('btn-redo').addEventListener('click', () => this.redo());
+            document.getElementById('btn-delete').addEventListener('click', () => this.deleteSelected());
+
+            // Zoom
+            document.getElementById('zoom-slider').addEventListener('input', (e) => {
+                this.zoom = e.target.value / 100;
+                this.updateZoomDisplay();
+            });
+
+            // Search
+            document.getElementById('search-components').addEventListener('input', (e) => this.filterLibrary(e.target.value));
+
+            // Keyboard
+            document.addEventListener('keydown', (e) => this.onKeyDown(e));
+
+            // File input
+            document.getElementById('file-input').addEventListener('change', (e) => this.loadProjectFromFile(e));
+        }
+
+        onCanvasMouseDown(e) {
+            if (e.target === this.canvas || e.target.classList.contains('selection-box')) {
+                this.clearSelection();
+                this.startSelectionBox(e);
+            }
+        }
+
+        onCanvasMouseMove(e) {
+            const rect = this.canvas.getBoundingClientRect();
+            const x = (e.clientX - rect.left - this.panOffset. x) / this.zoom;
+            const y = (e.clientY - rect.top - this. panOffset.y) / this.zoom;
+            document.getElementById('cursor-pos').textContent = `${Math.round(x)}, ${Math.round(y)}`;
+        }
+
+        onCanvasMouseUp(e) {
+            if (this.isDragging) {
+                this. isDragging = false;
+            }
+        }
+
+        onCanvasContextMenu(e) {
+            e.preventDefault();
+            const contextMenu = document.getElementById('context-menu');
+            contextMenu.innerHTML = `
+                <div class="context-item" onclick="app.duplicateSelected()">Duplicate</div>
+                <div class="context-item" onclick="app.clearSelection()">Deselect All</div>
+                <div class="context-item danger" onclick="app.deleteSelected()">Delete</div>
+            `;
+            contextMenu.style.display = 'block';
+            contextMenu.style.left = e. clientX + 'px';
+            contextMenu.style.top = e.clientY + 'px';
+
+            document.addEventListener('click', () => {
+                contextMenu.style.display = 'none';
+            }, { once: true });
+        }
+
+        onCanvasWheel(e) {
+            if (e.ctrlKey || e.metaKey) {
+                e.preventDefault();
+                const zoomDelta = e.deltaY > 0 ? -10 : 10;
+                const newZoom = Math.max(10, Math.min(200, document.getElementById('zoom-slider').value + zoomDelta));
+                document.getElementById('zoom-slider').value = newZoom;
+                this.zoom = newZoom / 100;
+                this.updateZoomDisplay();
+            }
+        }
+
+        onKeyDown(e) {
+            if (e. key === 'Delete' || e.key === 'Backspace') {
+                e.preventDefault();
+                this.deleteSelected();
+            }
+            if (e.ctrlKey && e.key === 'z') {
+                e.preventDefault();
+                this.undo();
+            }
+            if (e.ctrlKey && e.key === 'y') {
+                e.preventDefault();
+                this.redo();
+            }
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                this.saveProject();
+            }
+        }
+
+        addInstrument(item, x, y) {
+            const instrument = {
+                id: 'inst_' + Math.random().toString(36).substr(2, 9),
+                name: item.name,
+                x: Math.max(100, x),
+                y: Math.max(100, y),
+                w: item.w,
+                h: item.h,
+                rotation: 0,
+            };
+
+            const el = this.createInstrumentElement(instrument);
+            this.canvas.appendChild(el);
+            this.instruments.push(instrument);
+            this.selectInstrument(instrument);
+            this.saveHistory();
+        }
+
+        createInstrumentElement(instrument) {
+            const el = document.createElement('div');
+            el.className = 'instrument';
+            el.id = instrument.id;
+            el.style.left = instrument.x + 'px';
+            el.style.top = instrument.y + 'px';
+            el.style.width = instrument.w + 'px';
+            el.style.height = instrument.h + 'px';
+            el.style.transform = `rotate(${instrument.rotation}deg)`;
+            el.textContent = instrument.name;
+
+            el.addEventListener('mousedown', (e) => {
+                e.stopPropagation();
+                if (! e.ctrlKey) this.clearSelection();
+                this.selectInstrument(instrument);
+                this.startDrag(e, instrument);
+            });
+
+            // Resize handles
+            ['nw', 'ne', 'sw', 'se'].forEach(pos => {
+                const handle = document.createElement('div');
+                handle.className = `resize-handle ${pos}`;
+                handle.addEventListener('mousedown', (e) => {
+                    e.stopPropagation();
+                    this.startResize(e, instrument, pos);
+                });
+                el. appendChild(handle);
+            });
+
+            return el;
+        }
+
+        selectInstrument(instrument) {
+            if (! this.selected.includes(instrument)) {
+                this.selected.push(instrument);
+            }
+            document.getElementById(instrument.id).classList.add('selected');
+            this.updateProperties();
+            this.updateSelectedCount();
+        }
+
+        clearSelection() {
+            this.selected. forEach(inst => {
+                const el = document.getElementById(inst. id);
+                if (el) el.classList.remove('selected');
+            });
+            this.selected = [];
+            this.updateProperties();
+            this.updateSelectedCount();
+        }
+
+        startDrag(e, instrument) {
+            this.isDragging = true;
+            this.dragStart = { x: e.clientX, y: e.clientY };
+        }
+
+        startResize(e, instrument, handle) {
+            this.isResizing = true;
+            this. resizeHandle = handle;
+            this.dragStart = { x: e.clientX, y: e.clientY, w: instrument.w, h: instrument.h };
+        }
+
+        updateProperties() {
+            const panel = document.getElementById('properties-panel');
+            if (this.selected.length === 0) {
+                panel.innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 20px;"><i class="fas fa-square" style="font-size: 32px; opacity: 0.3; display: block; margin-bottom: 12px;"></i>No selection</div>';
+                return;
+            }
+
+            if (this.selected.length === 1) {
+                const inst = this.selected[0];
+                panel.innerHTML = `
+                    <div class="property-group">
+                        <label class="property-label">Name</label>
+                        <input class="property-input" type="text" value="${inst.name}" onchange="app.updateInstrument('name', this.value)">
+                    </div>
+                    <div class="property-group">
+                        <label class="property-label">Position</label>
+                        <div class="prop-row">
+                            <div>
+                                <label class="property-label" style="font-size: 9px;">X (px)</label>
+                                <input class="property-input" type="number" value="${inst.x}" onchange="app.updateInstrument('x', parseInt(this.value))">
+                            </div>
+                            <div>
+                                <label class="property-label" style="font-size: 9px;">Y (px)</label>
+                                <input class="property-input" type="number" value="${inst. y}" onchange="app.updateInstrument('y', parseInt(this.value))">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="property-group">
+                        <label class="property-label">Size</label>
+                        <div class="prop-row">
+                            <div>
+                                <label class="property-label" style="font-size: 9px;">Width (px)</label>
+                                <input class="property-input" type="number" value="${inst.w}" onchange="app.updateInstrument('w', parseInt(this.value))">
+                            </div>
+                            <div>
+                                <label class="property-label" style="font-size: 9px;">Height (px)</label>
+                                <input class="property-input" type="number" value="${inst.h}" onchange="app. updateInstrument('h', parseInt(this.value))">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="property-group">
+                        <label class="property-label">Rotation (°)</label>
+                        <input class="property-input" type="number" value="${inst.rotation}" min="0" max="360" onchange="app.updateInstrument('rotation', parseInt(this.value))">
+                    </div>
+                    <div class="property-group">
+                        <div class="button-group">
+                            <button class="btn-small" onclick="app.duplicateSelected()"><i class="fas fa-copy"></i> Duplicate</button>
+                            <button class="btn-small danger" onclick="app.deleteSelected()"><i class="fas fa-trash"></i> Delete</button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                panel.innerHTML = `<div style="padding: 12px; color: var(--text-secondary); font-size: 11px;">
+                    <strong>${this.selected.length} items selected</strong><br><br>
+                    Multiple selection editing coming soon. 
+                </div>`;
+            }
+        }
+
+        updateInstrument(property, value) {
+            this.selected.forEach(inst => {
+                inst[property] = value;
+                const el = document.getElementById(inst. id);
+                if (property === 'x') el.style.left = value + 'px';
+                if (property === 'y') el.style.top = value + 'px';
+                if (property === 'w') el.style.width = value + 'px';
+                if (property === 'h') el.style.height = value + 'px';
+                if (property === 'rotation') el.style.transform = `rotate(${value}deg)`;
+            });
+            this.updateProperties();
+            this.saveHistory();
+        }
+
+        duplicateSelected() {
+            const newInstruments = [];
+            this.selected.forEach(inst => {
+                const dup = { ...inst, id: 'inst_' + Math.random().toString(36).substr(2, 9), x: inst.x + 20, y: inst.y + 20 };
+                const el = this.createInstrumentElement(dup);
+                this.canvas.appendChild(el);
+                this.instruments.push(dup);
+                newInstruments.push(dup);
+            });
+            this.clearSelection();
+            newInstruments.forEach(inst => this.selectInstrument(inst));
+            this.saveHistory();
+        }
+
+        deleteSelected() {
+            this.selected.forEach(inst => {
+                const el = document.getElementById(inst. id);
+                if (el) el.remove();
+                this.instruments = this.instruments.filter(i => i. id !== inst.id);
+            });
+            this.clearSelection();
+            this.saveHistory();
+        }
+
+        startSelectionBox(e) {
+            // Simple selection box logic
+        }
+
+        updateZoomDisplay() {
+            document.getElementById('zoom-display').textContent = Math.round(this.zoom * 100) + '%';
+        }
+
+        updateSelectedCount() {
+            document. getElementById('selected-count').textContent = this.selected.length;
+        }
+
+        filterLibrary(query) {
+            const items = document.querySelectorAll('.component-item');
+            items.forEach(item => {
+                const matches = item.textContent.toLowerCase().includes(query.toLowerCase());
+                item.style.display = matches ?  'block' : 'none';
+            });
+        }
+
+        saveHistory() {
+            this.history = this.history.slice(0, this.historyIndex + 1);
+            this.history.push(JSON.parse(JSON.stringify(this.instruments)));
+            this.historyIndex++;
+        }
+
+        undo() {
+            if (this.historyIndex > 0) {
+                this.historyIndex--;
+                this.restoreFromHistory();
+            }
+        }
+
+        redo() {
+            if (this.historyIndex < this.history.length - 1) {
+                this.historyIndex++;
+                this.restoreFromHistory();
+            }
+        }
+
+        restoreFromHistory() {
+            this.instruments = JSON.parse(JSON.stringify(this.history[this.historyIndex]));
+            this.canvas.querySelectorAll('.instrument').forEach(el => el.remove());
+            this.instruments.forEach(inst => {
+                const el = this.createInstrumentElement(inst);
+                this.canvas.appendChild(el);
+            });
+            this.clearSelection();
+        }
+
+        newProject() {
+            if (confirm('Create new project?  Unsaved changes will be lost.')) {
+                this.canvas.querySelectorAll('.instrument').forEach(el => el.remove());
+                this.instruments = [];
+                this.history = [];
+                this.historyIndex = -1;
+                this.clearSelection();
+            }
+        }
+
+        saveProject() {
+            const projectData = {
+                name: prompt('Project name:', 'aircraft-panel') || 'aircraft-panel',
+                panelBoard: {
+                    width: this.panelBoard.style.width,
+                    height: this.panelBoard.style. height,
+                    left: this.panelBoard.style.left,
+                    top: this.panelBoard.style. top,
+                },
+                instruments: this.instruments,
+                timestamp: new Date().toISOString(),
+            };
+
+            const dataStr = JSON.stringify(projectData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = projectData.name + '.json';
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        openProject() {
+            document.getElementById('file-input').click();
+        }
+
+        loadProjectFromFile(e) {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const projectData = JSON.parse(event.target.result);
+                    this.canvas.querySelectorAll('.instrument').forEach(el => el.remove());
+                    this.instruments = projectData.instruments;
+                    this.instruments.forEach(inst => {
+                        const el = this.createInstrumentElement(inst);
+                        this.canvas.appendChild(el);
+                    });
+                    this.clearSelection();
+                    this.history = [JSON.parse(JSON.stringify(this.instruments))];
+                    this.historyIndex = 0;
+                } catch (err) {
+                    alert('Error loading project: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        render() {
+            // Rendering is handled by DOM updates
+        }
+    }
+
+    const app = new PanelDesigner();
+</script>
+
+</body>
+</html>
