@@ -8,4 +8,99 @@
         body {
             font-family: Arial, sans-serif;
             margin: 0;
-...rest of the html contents
+            padding: 0;
+            background-color: #f4f4f9;
+        }
+
+        header {
+            background: #333;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .designer-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: start;
+            align-items: center;
+            padding: 20px;
+        }
+
+        #panel-preview {
+            width: 80%;
+            height: 500px;
+            border: 2px dashed #666;
+            margin: 10px;
+            background: #fff;
+            overflow: auto;
+        }
+
+        .component {
+            background: #222;
+            color: #fff;
+            margin: 5px;
+            border-radius: 3px;
+            padding: 3px 8px;
+            cursor: grab;
+            user-select: none;
+        }
+
+        .component.draggable {
+            cursor: grabbing;
+        }
+
+        .btn {
+            margin: 5px;
+            padding: 10px;
+            cursor: pointer;
+            background: #007bff;
+            color: #fff;
+            border-radius: 3px;
+            border: 0;
+        }
+
+        .btn.danger {
+            background: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Aircraft Panel Designer</h1>
+    </header>
+    <div class="designer-container">
+        <h2>Panel Components</h2>
+        <div id="component-library">
+            <div class="component" draggable="true" data-type="altimeter">Altimeter</div>
+            <div class="component" draggable="true" data-type="airspeed">Airspeed Indicator</div>
+            <div class="component" draggable="true" data-type="horizon">Horizon Indicator</div>
+            <div class="component" draggable="true" data-type="compass">Compass</div>
+        </div>
+        <div id="panel-preview" ondrop="onDrop(event)" ondragover="onDragOver(event)"></div>
+        <button class="btn" onclick="savePanel()">Save Panel</button>
+        <button class="btn danger" onclick="clearPanel()">Clear</button>
+    </div>
+    <script>
+        const panelPreview = document.getElementById('panel-preview');
+        const components = document.querySelectorAll('.component');
+
+        components.forEach(component => {
+            component.addEventListener('dragstart', () => {
+                component.classList.add('draggable');
+            });
+            component.addEventListener('dragend', () => {
+                component.classList.remove('draggable');
+            });
+        });
+
+        function onDragOver(ev) {
+            ev.preventDefault(); // Enable drag over target
+        }
+
+        function onDrop(ev) {
+            ev.preventDefault(); // Allow dropping
+            const type = ev.target.dataset.type || ev.target.innerText;
+            const { offsetX, offsetY } = ev;
+            const newComp = document.createElement('child' || '"Panel"${top')!
+```  The initial implementation of the Aircraft Panel Designer application has been pushed to the `panel-designer` branch. You can now review and test the design.
